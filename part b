@@ -1,0 +1,53 @@
+import java.io.*;
+
+// Step 1: Create a Student class that implements Serializable
+class Student implements Serializable {
+    // serialVersionUID ensures class consistency during deserialization
+    private static final long serialVersionUID = 1L;
+
+    int studentID;
+    String name;
+    String grade;
+
+    // Constructor
+    public Student(int studentID, String name, String grade) {
+        this.studentID = studentID;
+        this.name = name;
+        this.grade = grade;
+    }
+
+    // Display method
+    public void display() {
+        System.out.println("Student ID: " + studentID);
+        System.out.println("Name: " + name);
+        System.out.println("Grade: " + grade);
+    }
+}
+
+// Step 2: Main class to serialize and deserialize the Student object
+public class StudentSerializationDemo {
+    public static void main(String[] args) {
+        // File name to store serialized object
+        String filename = "studentData.ser";
+
+        // Create a Student object
+        Student student1 = new Student(101, "Nitesh Grover", "A");
+
+        // ---------------------- Serialization ----------------------
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
+            oos.writeObject(student1);  // Serialize the object
+            System.out.println("✅ Student object has been serialized and saved to " + filename);
+        } catch (IOException e) {
+            System.out.println("Error during serialization: " + e.getMessage());
+        }
+
+        // ---------------------- Deserialization ----------------------
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
+            Student deserializedStudent = (Student) ois.readObject();  // Deserialize the object
+            System.out.println("\n✅ Student object has been deserialized successfully:");
+            deserializedStudent.display();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error during deserialization: " + e.getMessage());
+        }
+    }
+}
