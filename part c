@@ -1,0 +1,135 @@
+import java.io.*;
+import java.util.Scanner;
+
+class Employee {
+    private int id;
+    private String name;
+    private String designation;
+    private double salary;
+
+    // Constructor
+    public Employee(int id, String name, String designation, double salary) {
+        this.id = id;
+        this.name = name;
+        this.designation = designation;
+        this.salary = salary;
+    }
+
+    // Convert Employee details to formatted string for file storage
+    public String toFileFormat() {
+        return id + "," + name + "," + designation + "," + salary;
+    }
+
+    // Display Employee details neatly
+    public static void displayHeader() {
+        System.out.printf("%-10s %-20s %-20s %-10s%n", "ID", "Name", "Designation", "Salary");
+        System.out.println("---------------------------------------------------------------");
+    }
+
+    public void display() {
+        System.out.printf("%-10d %-20s %-20s %-10.2f%n", id, name, designation, salary);
+    }
+
+    // Parse Employee from stored text line
+    public static Employee fromFileFormat(String line) {
+        String[] parts = line.split(",");
+        if (parts.length != 4) return null;
+        int id = Integer.parseInt(parts[0]);
+        String name = parts[1];
+        String designation = parts[2];
+        double salary = Double.parseDouble(parts[3]);
+        return new Employee(id, name, designation, salary);
+    }
+}
+
+public class EmployeeFileApp {
+    private static final String FILE_NAME = "employees.txt";
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int choice;
+
+        do {
+            System.out.println("\n====== Employee Management System ======");
+            System.out.println("1. Add an Employee");
+            System.out.println("2. Display All Employees");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+            choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    addEmployee(sc);
+                    break;
+                case 2:
+                    displayEmployees();
+                    break;
+                case 3:
+                    System.out.println("Exiting the application... Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+
+        } while (choice != 3);
+
+        sc.close();
+    }
+
+    // Function to add employee data
+    private static void addEmployee(Scanner sc) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
+            System.out.print("Enter Employee ID: ");
+            int id = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            System.out.print("Enter Employee Name: ");
+            String name = sc.nextLine();
+
+            System.out.print("Enter Designation: ");
+            String designation = sc.nextLine();
+
+            System.out.print("Enter Salary: ");
+            double salary = sc.nextDouble();
+
+            Employee emp = new Employee(id, name, designation, salary);
+            writer.write(emp.toFileFormat());
+            writer.newLine();
+            System.out.println("✅ Employee record added successfully!");
+
+        } catch (IOException e) {
+            System.out.println("❌ Error writing to file: " + e.getMessage());
+        }
+    }
+
+    // Function to read and display all employee data
+    private static void displayEmployees() {
+        File file = new File(FILE_NAME);
+        if (!file.exists()) {
+            System.out.println("⚠️ No employee records found. Please add employees first!");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            boolean hasData = false;
+            Employee.displayHeader();
+
+            while ((line = reader.readLine()) != null) {
+                Employee emp = Employee.fromFileFormat(line);
+                if (emp != null) {
+                    emp.display();
+                    hasData = true;
+                }
+            }
+
+            if (!hasData) {
+                System.out.println("⚠️ No records found in the file!");
+            }
+
+        } catch (IOException e) {
+            System.out.println("❌ Error reading file: " + e.getMessage());
+        }
+    }
+}
